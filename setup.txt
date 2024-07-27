@@ -5,7 +5,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 pip install astroquery astropy
 
 #TO-DO
-1) Convert Celestial Coordinates --> Image
+1) Convert Celestial Coordinates --> Image DONE
 2) Pixel synth Image
 3) Be able to generate celestial coordinate for various options (interacting galaxies, supernova explosions etc)
 4) Combine together
