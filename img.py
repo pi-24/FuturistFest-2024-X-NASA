@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import requests
+import urllib
 
 def get_user_input():
     """Get coordinates from user"""
@@ -37,23 +38,16 @@ def submit_query(driver):
     submit_button = driver.find_element(By.XPATH, "//input[@value='Submit Request']")
     submit_button.click()
 
+def switch_to_results_page(driver):
+    """Switch to results page"""
+    driver.switch_to.window(driver.window_handles[1])
+
 def download_image(driver):
-    """Download image"""
-    # Wait for the "quick look jpeg" link to be present on the page
-    quick_look_link = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//a[contains(text(), 'quick look jpeg')]")))
-
-    # Click on the link
-    quick_look_link.click()
-
-    # Get the URL of the image
-    image_url = driver.current_url
-
-    # Download the image using requests
-    response = requests.get(image_url)
-
-    # Save the image to a file
-    with open("image.jpg", "wb") as f:
-        f.write(response.content)
+    img_element = driver.find_element(By.ID, "img1")
+    # Get the image URL
+    img_url = img_element.get_attribute("src")
+    # Download the image
+    urllib.request.urlretrieve(img_url, "image.jpg")
 
 def main():
     coords = get_user_input()
@@ -62,6 +56,9 @@ def main():
     input_coords(driver, coords)
     select_dataset(driver)
     submit_query(driver)
+    switch_to_results_page(driver)
+    # Now you can access the results page
+    print(driver.title)
     time.sleep(10)
     download_image(driver)
     driver.quit()
