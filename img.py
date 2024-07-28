@@ -28,10 +28,10 @@ def input_coords(driver, coords):
 
 def select_dataset(driver):
     """Select Fermi 5 dataset"""
-    element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "GammaRay")))
-    select_element = driver.find_element(By.ID, "GammaRay")
+    element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "ROSATw/sources class=")))
+    select_element = driver.find_element(By.ID, "ROSATw/sources class=")
     select = Select(select_element)
-    select.select_by_visible_text("Fermi 5")
+    select.select_by_visible_text("RASS-Cnt Broad")
 
 def submit_query(driver):
     """Submit query"""
