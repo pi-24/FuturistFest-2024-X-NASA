@@ -15,6 +15,8 @@ import time
 import urllib.request
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+import requests
+import xml.etree.ElementTree as ET
 
 # SkyView image fetching functions
 def setup_driver():
@@ -105,6 +107,35 @@ def image_to_unique_chimes(image_path, duration=15, sample_rate=44100):
 
     audio_signal = np.int16(audio_signal / np.max(np.abs(audio_signal)) * 32767)
     return audio_signal, sample_rate
+
+
+def get_celestial_object_description(coords):
+    ra, dec = coords.split(',')
+    ra = ra.strip()
+    dec = dec.strip()
+    
+    # Query the NASA/IPAC Extragalactic Database (NED)
+    url = f"https://ned.ipac.caltech.edu/cgi-bin/objsearch?search_type=Near+Position+Search&in_csys=Equatorial&in_equinox=J2000.0&lon={ra}d&lat={dec}d&radius=0.5&hconst=67.8&omegam=0.308&omegav=0.692&corr_z=1&z_constraint=Unconstrained&z_value1=&z_value2=&z_unit=z&ot_include=ANY&nmp_op=ANY&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=Distance+to+search+center&of=xml_main&zv_breaker=30000.0&list_limit=5&img_stamp=YES"
+    
+    response = requests.get(url)
+    root = ET.fromstring(response.content)
+    
+    # Extract information about the nearest object
+    try:
+        nearest_object = root.find('.//TABLE[@name="NED Objects,0,1,0"]/TR[2]')
+        object_name = nearest_object.find('./TD[2]').text
+        object_type = nearest_object.find('./TD[3]').text
+        redshift = nearest_object.find('./TD[6]').text
+        
+        description = f"The nearest object to the coordinates {coords} is {object_name}, classified as a {object_type}. "
+        if redshift and redshift != "N/A":
+            description += f"It has a redshift of {redshift}. "
+        description += "This information is based on data from the NASA/IPAC Extragalactic Database (NED)."
+    except AttributeError:
+        description = f"No detailed information found for the coordinates {coords} in the NASA/IPAC Extragalactic Database (NED)."
+    
+    return description
+
 
 # Streamlit app
 def main():
