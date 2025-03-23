@@ -27,23 +27,32 @@ def fetch_skyview_image(coords):
     driver = setup_driver()
     driver.get("https://skyview.gsfc.nasa.gov/current/cgi/query.pl")
     
+    # Input the coordinates
     input_element = driver.find_element(By.ID, "object")
     input_element.send_keys(coords)
     
-    select_element = driver.find_element(By.ID, "ROSATw/sources class=")
+    # Select "RXTE Allsky 3-20keV Flux" from the dropdown with the class 'selectbox' and ID 'HardX-ray'
+    select_element = driver.find_element(By.ID, "HardX-ray")  # ID of the select element
     select = Select(select_element)
-    select.select_by_visible_text("RASS-Cnt Broad")
     
+    # Select the option with visible text "RXTE Allsky 3-20keV Flux"
+    select.select_by_visible_text("RXTE Allsky 3-8keV Flux")
+    
+    # Submit the form
     submit_button = driver.find_element(By.XPATH, "//input[@value='Submit Request']")
     submit_button.click()
     
+    # Switch to the new window
     driver.switch_to.window(driver.window_handles[1])
     
+    # Wait for the image to be present
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "img1")))
     
+    # Get the image URL and download the image
     img_element = driver.find_element(By.ID, "img1")
     img_url = img_element.get_attribute("src")
     
+    # Download the image
     temp_dir = tempfile.mkdtemp()
     img_path = os.path.join(temp_dir, "skyview_image.jpg")
     urllib.request.urlretrieve(img_url, img_path)
